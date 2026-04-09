@@ -1,7 +1,10 @@
 package com.example.demo.reminder.domain
 
+import com.example.demo.common.domain.BaseEntity
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 @Entity
 @Table(name = "reminders")
@@ -22,23 +25,49 @@ class Reminder(
 
     @Column(nullable = false)
     var displayOrder: Int = 0,
-) {
-    @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime
+) : BaseEntity() {
+
+    @Column
+    var notes: String? = null
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime
+    var isFlagged: Boolean = false
 
-    init {
-        val now = LocalDateTime.now()
-        createdAt = now
-        updatedAt = now
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var priority: Priority = Priority.NONE
+
+    @Column
+    var dueDate: LocalDate? = null
+
+    @Column
+    var dueTime: LocalTime? = null
+
+    @Column
+    var completedAt: LocalDateTime? = null
+
+    fun update(
+        title: String,
+        notes: String?,
+        isFlagged: Boolean,
+        priority: Priority?,
+        dueDate: LocalDate?,
+        dueTime: LocalTime?,
+        displayOrder: Int,
+    ) {
+        this.title = title
+        this.notes = notes
+        this.isFlagged = isFlagged
+        this.priority = priority ?: Priority.NONE
+        this.dueDate = dueDate
+        this.dueTime = dueTime
+        this.displayOrder = displayOrder
+        this.updatedAt = LocalDateTime.now()
     }
 
-    fun update(title: String, isCompleted: Boolean, displayOrder: Int) {
-        this.title = title
-        this.isCompleted = isCompleted
-        this.displayOrder = displayOrder
+    fun toggleComplete() {
+        this.isCompleted = !this.isCompleted
+        this.completedAt = if (this.isCompleted) LocalDateTime.now() else null
         this.updatedAt = LocalDateTime.now()
     }
 }

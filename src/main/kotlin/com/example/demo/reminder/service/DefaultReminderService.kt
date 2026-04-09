@@ -31,13 +31,37 @@ class DefaultReminderService(
         val reminderList = reminderListRepository.findByIdAndMemberId(listId, memberId)
             ?: throw NoSuchElementException("ReminderList not found: $listId")
 
-        // 목록 소유권 검증
         val displayOrder = reminderRepository.countByReminderListId(listId).toInt()
 
         val reminder = reminderRepository.save(
             request.toEntity(reminderList = reminderList, displayOrder = displayOrder)
         )
 
+        return ReminderResponse.from(reminder)
+    }
+
+    @Transactional
+    override fun update(id: Long, memberId: Long, request: ReminderRequest): ReminderResponse {
+        val reminder = reminderRepository.findByIdAndReminderListMemberId(id, memberId)
+            ?: throw NoSuchElementException("Reminder not found: $id")
+        reminder.update(request.title, request.notes, request.isFlagged, request.priority,
+            request.dueDate, request.dueTime, request.displayOrder)
+        return ReminderResponse.from(reminder)
+    }
+
+    @Transactional
+    override fun delete(id: Long, memberId: Long) {
+        val reminder = reminderRepository.findByIdAndReminderListMemberId(id, memberId)
+            ?: throw NoSuchElementException("Reminder not found: $id")
+
+        reminderRepository.delete(reminder)
+    }
+
+    @Transactional
+    override fun toggleComplete(id: Long, memberId: Long): ReminderResponse {
+        val reminder = reminderRepository.findByIdAndReminderListMemberId(id, memberId)
+            ?: throw NoSuchElementException("Reminder not found: $id")
+        reminder.toggleComplete()
         return ReminderResponse.from(reminder)
     }
 }

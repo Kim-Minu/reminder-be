@@ -1,5 +1,7 @@
 package com.example.demo.member.controller
 
+import com.example.demo.member.dto.LoginRequest
+import com.example.demo.member.dto.RegisterRequest
 import com.example.demo.member.repository.MemberRepository
 import com.example.demo.member.service.ports.inp.MemberService
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -34,6 +36,12 @@ class AuthControllerTest {
             .build()
     }
 
+    private fun register(email: String, password: String = "password1234", name: String = "테스터") =
+        memberService.register(RegisterRequest(email = email, password = password, name = name))
+
+    private fun login(email: String, password: String = "password1234") =
+        memberService.login(LoginRequest(email = email, password = password))
+
     @Nested
     inner class Register {
 
@@ -54,7 +62,7 @@ class AuthControllerTest {
 
         @Test
         fun `중복 이메일로 가입하면 400을 반환한다`() {
-            memberService.register("dup@example.com", "password1234", "기존")
+            register("dup@example.com")
             val body = mapOf("email" to "dup@example.com", "password" to "password1234", "name" to "신규")
 
             mockMvc.post("/api/auth/register") {
@@ -89,7 +97,7 @@ class AuthControllerTest {
 
         @Test
         fun `올바른 자격증명으로 로그인하면 200과 토큰을 반환한다`() {
-            memberService.register("login@example.com", "password1234", "테스터")
+            register("login@example.com")
             val body = mapOf("email" to "login@example.com", "password" to "password1234")
 
             mockMvc.post("/api/auth/login") {
@@ -105,7 +113,7 @@ class AuthControllerTest {
 
         @Test
         fun `잘못된 비밀번호로 로그인하면 400을 반환한다`() {
-            memberService.register("wrong@example.com", "password1234", "테스터")
+            register("wrong@example.com")
             val body = mapOf("email" to "wrong@example.com", "password" to "wrongpassword")
 
             mockMvc.post("/api/auth/login") {
@@ -130,8 +138,8 @@ class AuthControllerTest {
 
         @Test
         fun `유효한 refreshToken으로 새 토큰을 발급한다`() {
-            memberService.register("refresh@example.com", "password1234", "테스터")
-            val tokens = memberService.login("refresh@example.com", "password1234")
+            register("refresh@example.com")
+            val tokens = login("refresh@example.com")
             val body = mapOf("refreshToken" to tokens.refreshToken)
 
             mockMvc.post("/api/auth/refresh") {
@@ -160,8 +168,8 @@ class AuthControllerTest {
 
         @Test
         fun `로그아웃하면 204를 반환한다`() {
-            memberService.register("logout@example.com", "password1234", "테스터")
-            val tokens = memberService.login("logout@example.com", "password1234")
+            register("logout@example.com")
+            val tokens = login("logout@example.com")
             val body = mapOf("refreshToken" to tokens.refreshToken)
 
             mockMvc.post("/api/auth/logout") {

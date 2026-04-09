@@ -1,7 +1,7 @@
 package com.example.demo.member.domain
 
+import com.example.demo.common.domain.BaseEntity
 import jakarta.persistence.*
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "members")
@@ -22,16 +22,4 @@ class Member(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     val role: Role = Role.USER,
-) {
-    @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime
-
-    @Column(nullable = false)
-    var updatedAt: LocalDateTime
-
-    init {
-        val now = LocalDateTime.now()
-        createdAt = now
-        updatedAt = now
-    }
-}
+) : BaseEntity()

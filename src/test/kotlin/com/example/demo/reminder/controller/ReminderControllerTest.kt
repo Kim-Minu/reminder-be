@@ -1,5 +1,6 @@
 package com.example.demo.reminder.controller
 
+import com.example.demo.common.security.WithMockCustomUser
 import com.example.demo.reminder.domain.ReminderList
 import com.example.demo.reminder.repository.ReminderListRepository
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -9,18 +10,20 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.WebApplicationContext
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
-@WithMockUser
+@WithMockCustomUser
 class ReminderControllerTest {
 
     @Autowired lateinit var context: WebApplicationContext
@@ -28,6 +31,7 @@ class ReminderControllerTest {
 
     private lateinit var mockMvc: MockMvc
     private val objectMapper = jacksonObjectMapper()
+    private val memberId = 1L
 
     @BeforeEach
     fun setup() {
@@ -37,7 +41,7 @@ class ReminderControllerTest {
     }
 
     private fun saveList(name: String = "테스트 목록") =
-        reminderListRepository.save(ReminderList(name = name, color = "#007AFF", displayOrder = 0))
+        reminderListRepository.save(ReminderList(memberId = memberId, name = name, color = "#007AFF", displayOrder = 0))
 
     @Nested
     inner class GetByListId {
@@ -113,6 +117,93 @@ class ReminderControllerTest {
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(body)
             }.andExpect { status { isNotFound() } }
+        }
+    }
+
+    @Nested
+    inner class Update {
+
+        @Test
+        fun `유효한 요청으로 리마인더를 수정하면 200과 수정된 리마인더를 반환한다`() {
+            val list = saveList()
+            val created = mockMvc.post("/api/reminder-lists/${list.id}/reminders") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(mapOf("title" to "원래 제목"))
+            }.andReturn().response.let { objectMapper.readTree(it.contentAsString) }
+            val id = created["id"].asLong()
+
+            mockMvc.put("/api/reminder-lists/${list.id}/reminders/$id") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(mapOf("title" to "수정된 제목", "notes" to "메모"))
+            }.andExpect {
+                status { isOk() }
+                jsonPath("$.title") { value("수정된 제목") }
+                jsonPath("$.notes") { value("메모") }
+            }
+        }
+
+        @Test
+        fun `존재하지 않는 리마인더를 수정하면 404를 반환한다`() {
+            val list = saveList()
+
+            mockMvc.put("/api/reminder-lists/${list.id}/reminders/999") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(mapOf("title" to "제목"))
+            }.andExpect { status { isNotFound() } }
+        }
+    }
+
+    @Nested
+    inner class Delete {
+
+        @Test
+        fun `리마인더를 삭제하면 204를 반환한다`() {
+            val list = saveList()
+            val created = mockMvc.post("/api/reminder-lists/${list.id}/reminders") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(mapOf("title" to "삭제할 항목"))
+            }.andReturn().response.let { objectMapper.readTree(it.contentAsString) }
+            val id = created["id"].asLong()
+
+            mockMvc.delete("/api/reminder-lists/${list.id}/reminders/$id")
+                .andExpect { status { isNoContent() } }
+        }
+
+        @Test
+        fun `존재하지 않는 리마인더를 삭제하면 404를 반환한다`() {
+            val list = saveList()
+
+            mockMvc.delete("/api/reminder-lists/${list.id}/reminders/999")
+                .andExpect { status { isNotFound() } }
+        }
+    }
+
+    @Nested
+    inner class ToggleComplete {
+
+        @Test
+        fun `완료 토글 시 200과 변경된 리마인더를 반환한다`() {
+            val list = saveList()
+            val created = mockMvc.post("/api/reminder-lists/${list.id}/reminders") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(mapOf("title" to "할 일"))
+            }.andReturn().response.let { objectMapper.readTree(it.contentAsString) }
+            val id = created["id"].asLong()
+
+            mockMvc.patch("/api/reminder-lists/${list.id}/reminders/$id/complete")
+                .andExpect {
+                    status { isOk() }
+                    jsonPath("$.isCompleted") { value(true) }
+                    jsonPath("$.completedAt") { isNotEmpty() }
+                }
+        }
+
+        @Test
+        fun `존재하지 않는 리마인더를 토글하면 404를 반환한다`() {
+            val list = saveList()
+
+            mockMvc.patch("/api/reminder-lists/${list.id}/reminders/999/complete")
+                .andExpect { status { isNotFound() } }
         }
     }
 }

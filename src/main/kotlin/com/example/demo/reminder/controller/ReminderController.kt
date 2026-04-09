@@ -29,4 +29,27 @@ class ReminderController(private val reminderService: ReminderService) {
         @CurrentMember memberId: Long,
     ): ReminderResponse = reminderService.create(listId, memberId, request)
 
+    @PutMapping("/{id}")
+    fun update(
+        @PathVariable listId: Long,
+        @PathVariable id: Long,
+        @Valid @RequestBody request: ReminderRequest,
+        @CurrentMember memberId: Long,
+    ): ReminderResponse = reminderService.update(id, memberId, request)
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun delete(
+        @PathVariable listId: Long,
+        @PathVariable id: Long,
+        @CurrentMember memberId: Long,
+    ) = reminderService.delete(id, memberId)
+
+    @PatchMapping("/{id}/complete")
+    fun toggleComplete(
+        @PathVariable listId: Long,
+        @PathVariable id: Long,
+        @CurrentMember memberId: Long,
+    ): ReminderResponse = reminderService.toggleComplete(id, memberId)
+
 }

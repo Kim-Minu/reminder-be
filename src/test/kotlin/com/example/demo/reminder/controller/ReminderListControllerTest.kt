@@ -1,5 +1,6 @@
 package com.example.demo.reminder.controller
 
+import com.example.demo.common.security.WithMockCustomUser
 import com.example.demo.reminder.domain.ReminderList
 import com.example.demo.reminder.repository.ReminderListRepository
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
@@ -22,7 +22,7 @@ import org.springframework.web.context.WebApplicationContext
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Transactional
-@WithMockUser
+@WithMockCustomUser
 class ReminderListControllerTest {
 
     @Autowired lateinit var context: WebApplicationContext
@@ -30,6 +30,7 @@ class ReminderListControllerTest {
 
     private lateinit var mockMvc: MockMvc
     private val objectMapper = jacksonObjectMapper()
+    private val memberId = 1L
 
     @BeforeEach
     fun setup() {
@@ -43,8 +44,8 @@ class ReminderListControllerTest {
 
         @Test
         fun `저장된 목록을 displayOrder 순으로 반환한다`() {
-            repository.save(ReminderList(name = "직장", displayOrder = 1))
-            repository.save(ReminderList(name = "집", displayOrder = 0))
+            repository.save(ReminderList(memberId = memberId, name = "직장", displayOrder = 1))
+            repository.save(ReminderList(memberId = memberId, name = "집", displayOrder = 0))
 
             mockMvc.get("/api/reminder-lists")
                 .andExpect {
@@ -69,7 +70,7 @@ class ReminderListControllerTest {
 
         @Test
         fun `존재하는 id로 조회하면 200과 목록을 반환한다`() {
-            val saved = repository.save(ReminderList(name = "집", color = "#007AFF"))
+            val saved = repository.save(ReminderList(memberId = memberId, name = "집", color = "#007AFF"))
 
             mockMvc.get("/api/reminder-lists/${saved.id}")
                 .andExpect {
@@ -144,7 +145,7 @@ class ReminderListControllerTest {
 
         @Test
         fun `유효한 요청으로 수정하면 200과 수정된 목록을 반환한다`() {
-            val saved = repository.save(ReminderList(name = "이전", color = "#007AFF", displayOrder = 0))
+            val saved = repository.save(ReminderList(memberId = memberId, name = "이전", color = "#007AFF", displayOrder = 0))
             val body = mapOf("name" to "새 이름", "color" to "#FF9500", "displayOrder" to 1)
 
             mockMvc.put("/api/reminder-lists/${saved.id}") {
@@ -174,7 +175,7 @@ class ReminderListControllerTest {
 
         @Test
         fun `존재하는 id를 삭제하면 204를 반환한다`() {
-            val saved = repository.save(ReminderList(name = "삭제 대상"))
+            val saved = repository.save(ReminderList(memberId = memberId, name = "삭제 대상"))
 
             mockMvc.delete("/api/reminder-lists/${saved.id}")
                 .andExpect { status { isNoContent() } }

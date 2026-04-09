@@ -12,4 +12,5 @@ interface MemberService {
     fun login(request: LoginRequest): TokenResponse
     fun refresh(request: RefreshRequest): TokenResponse
     fun logout(request: RefreshRequest)
+    fun me(memberId: Long): MemberResponse
 }

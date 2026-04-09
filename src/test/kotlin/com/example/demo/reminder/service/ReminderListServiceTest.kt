@@ -1,6 +1,8 @@
 package com.example.demo.reminder.service
 
 import com.example.demo.reminder.domain.ReminderList
+import com.example.demo.reminder.dto.CreateReminderListRequest
+import com.example.demo.reminder.dto.UpdateReminderListRequest
 import com.example.demo.reminder.repository.ReminderListRepository
 import com.example.demo.reminder.service.ports.inp.ReminderListService
 import org.assertj.core.api.Assertions.assertThat
@@ -76,29 +78,28 @@ class ReminderListServiceTest {
 
         @Test
         fun `name과 color로 목록을 생성하면 DB에 저장된다`() {
-            val result = service.create(memberId, name = "장보기", color = "#FF3B30")
+            val result = service.create(memberId, CreateReminderListRequest(name = "장보기", color = "#FF3B30"))
 
             assertThat(result.id).isPositive()
-            assertThat(result.memberId).isEqualTo(memberId)
             assertThat(result.name).isEqualTo("장보기")
             assertThat(result.color).isEqualTo("#FF3B30")
         }
 
         @Test
         fun `displayOrder는 해당 멤버의 기존 목록 수로 설정된다`() {
-            service.create(memberId, "첫 번째")
-            service.create(memberId, "두 번째")
-            val third = service.create(memberId, "세 번째")
+            service.create(memberId, CreateReminderListRequest("첫 번째"))
+            service.create(memberId, CreateReminderListRequest("두 번째"))
+            val third = service.create(memberId, CreateReminderListRequest("세 번째"))
 
             assertThat(third.displayOrder).isEqualTo(2)
         }
 
         @Test
         fun `다른 멤버의 목록 수는 displayOrder 계산에 영향을 주지 않는다`() {
-            service.create(otherMemberId, "다른 멤버 목록")
-            service.create(otherMemberId, "다른 멤버 목록2")
+            service.create(otherMemberId, CreateReminderListRequest("다른 멤버 목록"))
+            service.create(otherMemberId, CreateReminderListRequest("다른 멤버 목록2"))
 
-            val result = service.create(memberId, "나의 첫 번째")
+            val result = service.create(memberId, CreateReminderListRequest("나의 첫 번째"))
 
             assertThat(result.displayOrder).isEqualTo(0)
         }
@@ -111,7 +112,7 @@ class ReminderListServiceTest {
         fun `자신의 목록을 수정한다`() {
             val saved = saveList("이전")
 
-            service.update(saved.id, memberId, "새 이름", "#FF9500", 2)
+            service.update(saved.id, memberId, UpdateReminderListRequest(name = "새 이름", color = "#FF9500", displayOrder = 2))
 
             val updated = repository.findById(saved.id).get()
             assertThat(updated.name).isEqualTo("새 이름")
@@ -123,8 +124,9 @@ class ReminderListServiceTest {
         fun `다른 멤버의 목록을 수정하면 NoSuchElementException을 던진다`() {
             val saved = saveList("집", owner = otherMemberId)
 
-            assertThatThrownBy { service.update(saved.id, memberId, "변경", "#000", 0) }
-                .isInstanceOf(NoSuchElementException::class.java)
+            assertThatThrownBy {
+                service.update(saved.id, memberId, UpdateReminderListRequest(name = "변경", color = "#000000", displayOrder = 0))
+            }.isInstanceOf(NoSuchElementException::class.java)
         }
     }
 

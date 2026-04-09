@@ -1,5 +1,6 @@
 package com.example.demo.reminder.domain
 
+import com.example.demo.common.domain.BaseEntity
 import com.example.demo.reminder.dto.UpdateReminderListRequest
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -25,18 +26,7 @@ class ReminderList(
 
     @OneToMany(mappedBy = "reminderList", cascade = [CascadeType.ALL], orphanRemoval = true)
     val reminders: MutableList<Reminder> = mutableListOf()
-) {
-    @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime
-
-    @Column(nullable = false)
-    var updatedAt: LocalDateTime
-
-    init {
-        val now = LocalDateTime.now()
-        createdAt = now
-        updatedAt = now
-    }
+) : BaseEntity() {
 
     fun update(request: UpdateReminderListRequest) {
         this.name = request.name

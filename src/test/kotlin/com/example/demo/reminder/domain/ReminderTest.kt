@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 class ReminderTest {
 
-    private fun makeList() = ReminderList(name = "테스트 목록", color = "#007AFF", displayOrder = 0)
+    private fun makeList() = ReminderList(memberId = 1L, name = "테스트 목록", color = "#007AFF", displayOrder = 0)
 
     @Nested
     inner class Constructor {
@@ -46,18 +46,18 @@ class ReminderTest {
         fun `update 호출 시 title이 변경된다`() {
             val reminder = Reminder(reminderList = makeList(), title = "원래 제목")
 
-            reminder.update(title = "새 제목", isCompleted = false, displayOrder = 0)
+            reminder.update("새 제목", null, false, Priority.NONE, null, null, 0)
 
             assertThat(reminder.title).isEqualTo("새 제목")
         }
 
         @Test
-        fun `update 호출 시 isCompleted가 변경된다`() {
+        fun `update 호출 시 notes가 변경된다`() {
             val reminder = Reminder(reminderList = makeList(), title = "할 일")
 
-            reminder.update(title = "할 일", isCompleted = true, displayOrder = 0)
+            reminder.update("할 일", "메모 추가", false, Priority.NONE, null, null, 0)
 
-            assertThat(reminder.isCompleted).isTrue()
+            assertThat(reminder.notes).isEqualTo("메모 추가")
         }
 
         @Test
@@ -66,7 +66,7 @@ class ReminderTest {
             val before = reminder.updatedAt
 
             Thread.sleep(5)
-            reminder.update(title = "변경", isCompleted = false, displayOrder = 0)
+            reminder.update("변경", null, false, Priority.NONE, null, null, 0)
 
             assertThat(reminder.updatedAt).isAfterOrEqualTo(before)
         }

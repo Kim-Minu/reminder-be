@@ -29,6 +29,15 @@ class DefaultMemberService(
     @Value("\${jwt.refresh-token-expiration}") private val refreshTokenExpiration: Long,
 ) : MemberService {
 
+    override fun me(memberId: Long): MemberResponse {
+
+        val member = memberRepository.findById(memberId).orElseThrow {
+            NoSuchElementException("존재하지 않는 회원입니다: $memberId")
+        }
+
+        return MemberResponse.from(member)
+    }
+
     @Transactional
     override fun register(request: RegisterRequest): MemberResponse {
 
