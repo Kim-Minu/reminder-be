@@ -1,0 +1,26 @@
+spring:
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
+  datasource:
+    url: jdbc:mariadb://localhost:3306/reminders_app
+    username: root
+    password: qwerty0922
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    generate-ddl: true
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+
+  output:
+    ansi:
+      enabled: always
+
+jwt:
+  secret: bXlWZXJ5U2VjcmV0S2V5Rm9ySnd0VG9rZW5HZW5lcmF0aW9uMjAyNlJlbWluZGVyc0FwcA==
+  access-token-expiration: 3600000
+  refresh-token-expiration: 604800000
