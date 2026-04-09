@@ -1,9 +1,10 @@
 package com.example.demo.member.service
 
-import com.example.demo.common.security.JwtTokenProvider
+import com.example.demo.common.security.jwt.JwtTokenProvider
 import com.example.demo.member.domain.Member
 import com.example.demo.member.domain.RefreshToken
 import com.example.demo.member.dto.LoginRequest
+import com.example.demo.member.dto.MemberResponse
 import com.example.demo.member.dto.RefreshRequest
 import com.example.demo.member.dto.RegisterRequest
 import com.example.demo.member.dto.TokenResponse
@@ -29,7 +30,7 @@ class DefaultMemberService(
 ) : MemberService {
 
     @Transactional
-    override fun register(request: RegisterRequest): Member {
+    override fun register(request: RegisterRequest): MemberResponse {
 
         val email: String = request.email;
 
@@ -37,7 +38,9 @@ class DefaultMemberService(
             throw IllegalArgumentException("이미 사용 중인 이메일입니다: $email")
         }
 
-        return memberRepository.save(request.toEntity(passwordEncoder))
+        val member = memberRepository.save(request.toEntity(passwordEncoder))
+
+        return MemberResponse.from(member)
     }
 
     @Transactional
@@ -63,6 +66,7 @@ class DefaultMemberService(
 
         val stored = refreshTokenRepository.findByToken(refreshToken)
             ?: throw NoSuchElementException("유효하지 않은 리프레시 토큰입니다")
+
         if (stored.isExpired()) {
             refreshTokenRepository.delete(stored)
             throw IllegalArgumentException("만료된 리프레시 토큰입니다")
@@ -83,10 +87,15 @@ class DefaultMemberService(
     }
 
     private fun issueTokens(member: Member): TokenResponse {
+
         val accessToken = jwtTokenProvider.generateAccessToken(member.id, member.email)
         val rawRefreshToken = UUID.randomUUID().toString()
         val expiresAt = LocalDateTime.now().plusSeconds(refreshTokenExpiration / 1000)
-        refreshTokenRepository.save(RefreshToken(token = rawRefreshToken, memberId = member.id, expiresAt = expiresAt))
+
+        refreshTokenRepository.save(
+            RefreshToken(token = rawRefreshToken, memberId = member.id, expiresAt = expiresAt)
+        )
+
         return TokenResponse(accessToken = accessToken, refreshToken = rawRefreshToken)
     }
 }

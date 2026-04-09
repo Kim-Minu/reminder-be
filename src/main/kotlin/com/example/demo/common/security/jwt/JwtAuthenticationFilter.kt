@@ -1,4 +1,4 @@
-package com.example.demo.common.security
+package com.example.demo.common.security.jwt
 
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -11,7 +11,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 class JwtAuthenticationFilter(
     private val jwtTokenProvider: JwtTokenProvider,
-    private val userDetailsService: UserDetailsService,
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -20,13 +19,15 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain,
     ) {
         val token = resolveToken(request)
+
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            val memberId = jwtTokenProvider.getMemberIdFromToken(token)
-            val userDetails = userDetailsService.loadUserByUsername(memberId.toString())
-            val auth = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-            auth.details = WebAuthenticationDetailsSource().buildDetails(request)
-            SecurityContextHolder.getContext().authentication = auth
+
+            val authentication = jwtTokenProvider.parseAuthentication(token)
+
+            SecurityContextHolder.getContext().authentication =
+                authentication
         }
+
         filterChain.doFilter(request, response)
     }
 

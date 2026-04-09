@@ -1,9 +1,12 @@
-package com.example.demo.common.security
+package com.example.demo.common.security.jwt
 
+import com.example.demo.common.security.principal.CustomPrincipal
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 import java.util.Date
 import javax.crypto.SecretKey
@@ -26,15 +29,24 @@ class JwtTokenProvider(
             .signWith(key)
             .compact()
 
-    fun getMemberIdFromToken(token: String): Long =
-        Jwts.parser()
+    fun parseAuthentication(token: String): Authentication {
+        val claims = Jwts.parser()
             .verifyWith(key)
             .build()
             .parseSignedClaims(token)
             .payload
-            .subject
-            .toLong()
 
+        val principal = CustomPrincipal(
+            memberId = claims.subject.toLong(),
+            email = claims["email"] as String
+        )
+
+        return UsernamePasswordAuthenticationToken(
+            principal,
+            null,
+            emptyList()
+        )
+    }
     fun validateToken(token: String): Boolean = try {
         Jwts.parser().verifyWith(key).build().parseSignedClaims(token)
         true

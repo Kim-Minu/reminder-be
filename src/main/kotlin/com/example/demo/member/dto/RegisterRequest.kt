@@ -18,11 +18,10 @@ data class RegisterRequest(
     @field:NotBlank
     val name: String,
 ) {
-    fun toEntity(passwordEncoder: PasswordEncoder): Member {
-        return Member(
+    fun toEntity(passwordEncoder: PasswordEncoder): Member =
+        Member(
             email = email,
             name = name,
             password = passwordEncoder.encode(password)!!,
         )
-    }
 }

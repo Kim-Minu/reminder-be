@@ -1,5 +1,6 @@
 package com.example.demo.reminder.domain
 
+import com.example.demo.reminder.dto.UpdateReminderListRequest
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -37,10 +38,10 @@ class ReminderList(
         updatedAt = now
     }
 
-    fun update(name: String, color: String, displayOrder: Int) {
-        this.name = name
-        this.color = color
-        this.displayOrder = displayOrder
+    fun update(request: UpdateReminderListRequest) {
+        this.name = request.name
+        this.color = request.color
+        this.displayOrder = request.displayOrder
         this.updatedAt = LocalDateTime.now()
     }
 }

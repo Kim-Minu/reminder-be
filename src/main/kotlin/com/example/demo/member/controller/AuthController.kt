@@ -16,7 +16,7 @@ class AuthController(private val memberService: MemberService) {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     fun register(@Valid @RequestBody request: RegisterRequest): MemberResponse =
-        MemberResponse.from(memberService.register(request))
+        memberService.register(request)
 
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequest): TokenResponse =

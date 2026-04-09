@@ -15,10 +15,11 @@ class CustomUserDetailsService(
 
     // username = memberId (String)
     override fun loadUserByUsername(username: String): UserDetails {
-        val member = memberRepository.findById(username.toLong())
-            .orElseThrow { UsernameNotFoundException("Member not found: $username") }
+        val member = memberRepository.findByEmail(username)
+            ?: throw UsernameNotFoundException("Member not found: $username")
+
         return User(
-            member.id.toString(),
+            username,
             member.password,
             listOf(SimpleGrantedAuthority("ROLE_${member.role}")),
         )

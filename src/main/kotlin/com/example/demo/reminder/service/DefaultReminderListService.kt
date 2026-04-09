@@ -1,6 +1,9 @@
 package com.example.demo.reminder.service
 
 import com.example.demo.reminder.domain.ReminderList
+import com.example.demo.reminder.dto.CreateReminderListRequest
+import com.example.demo.reminder.dto.ReminderListResponse
+import com.example.demo.reminder.dto.UpdateReminderListRequest
 import com.example.demo.reminder.repository.ReminderListRepository
 import com.example.demo.reminder.service.ports.inp.ReminderListService
 import org.springframework.stereotype.Service
@@ -12,31 +15,46 @@ class DefaultReminderListService(
     private val reminderListRepository: ReminderListRepository
 ) : ReminderListService {
 
-    override fun findAll(memberId: Long): List<ReminderList> =
+    override fun findAll(memberId: Long): List<ReminderListResponse> =
         reminderListRepository.findAllByMemberIdOrderByDisplayOrderAsc(memberId)
+            .map { ReminderListResponse.from(it) }
+            .toList()
 
-    override fun findById(id: Long, memberId: Long): ReminderList =
-        reminderListRepository.findByIdAndMemberId(id, memberId)
+    override fun findById(id: Long, memberId: Long): ReminderListResponse {
+        val reminderList = reminderListRepository.findByIdAndMemberId(id, memberId)
             ?: throw NoSuchElementException("ReminderList not found: $id")
 
+        return ReminderListResponse.from(reminderList)
+    }
+
     @Transactional
-    override fun create(memberId: Long, name: String, color: String): ReminderList {
+    override fun create(memberId: Long, request: CreateReminderListRequest): ReminderListResponse {
+
         val displayOrder = reminderListRepository.countByMemberId(memberId).toInt()
-        return reminderListRepository.save(
-            ReminderList(memberId = memberId, name = name, color = color, displayOrder = displayOrder)
+
+        return ReminderListResponse.from(
+            reminderListRepository.save(
+                request.toEntity(memberId, displayOrder)
+            )
         )
     }
 
     @Transactional
-    override fun update(id: Long, memberId: Long, name: String, color: String, displayOrder: Int): ReminderList {
-        val reminderList = findById(id, memberId)
-        reminderList.update(name = name, color = color, displayOrder = displayOrder)
-        return reminderList
+    override fun update(id: Long, memberId: Long, request: UpdateReminderListRequest): ReminderListResponse {
+
+        val reminderList = reminderListRepository.findByIdAndMemberId(id, memberId)
+            ?: throw NoSuchElementException("ReminderList not found: $id")
+
+        reminderList.update(request)
+
+        return ReminderListResponse.from(reminderList)
     }
 
     @Transactional
     override fun delete(id: Long, memberId: Long) {
-        val reminderList = findById(id, memberId)
+        val reminderList = reminderListRepository.findByIdAndMemberId(id, memberId)
+            ?: throw NoSuchElementException("ReminderList not found: $id")
+
         reminderListRepository.delete(reminderList)
     }
 }

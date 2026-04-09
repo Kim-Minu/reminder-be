@@ -1,5 +1,6 @@
 package com.example.demo.reminder.controller
 
+import com.example.demo.common.security.resolver.CurrentMember
 import com.example.demo.reminder.dto.CreateReminderListRequest
 import com.example.demo.reminder.dto.ReminderListResponse
 import com.example.demo.reminder.dto.UpdateReminderListRequest
@@ -15,43 +16,37 @@ import org.springframework.web.bind.annotation.*
 class ReminderListController(private val reminderListService: ReminderListService) {
 
     @GetMapping
-    fun getAll(@AuthenticationPrincipal user: UserDetails): List<ReminderListResponse> =
-        reminderListService.findAll(user.memberId()).map { ReminderListResponse.from(it) }
+    fun getAll(@CurrentMember memberId: Long): List<ReminderListResponse> =
+        reminderListService.findAll(memberId)
 
     @GetMapping("/{id}")
     fun getById(
         @PathVariable id: Long,
-        @AuthenticationPrincipal user: UserDetails,
-    ): ReminderListResponse =
-        ReminderListResponse.from(reminderListService.findById(id, user.memberId()))
+        @CurrentMember memberId: Long
+    ): ReminderListResponse = reminderListService.findById(id, memberId)
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun create(
         @Valid @RequestBody request: CreateReminderListRequest,
-        @AuthenticationPrincipal user: UserDetails,
-    ): ReminderListResponse =
-        ReminderListResponse.from(
-            reminderListService.create(user.memberId(), request.name, request.color ?: "#007AFF")
-        )
+        @CurrentMember memberId: Long
+    ): ReminderListResponse = reminderListService.create(memberId, request)
+
 
     @PutMapping("/{id}")
     fun update(
         @PathVariable id: Long,
         @Valid @RequestBody request: UpdateReminderListRequest,
-        @AuthenticationPrincipal user: UserDetails,
-    ): ReminderListResponse =
-        ReminderListResponse.from(
-            reminderListService.update(id, user.memberId(), request.name, request.color, request.displayOrder)
-        )
+        @CurrentMember memberId: Long
+    ): ReminderListResponse = reminderListService.update(id, memberId, request)
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(
         @PathVariable id: Long,
-        @AuthenticationPrincipal user: UserDetails,
-    ) = reminderListService.delete(id, user.memberId())
+        @CurrentMember memberId: Long
+    ) = reminderListService.delete(id, memberId)
 }
 
-
-private fun UserDetails.memberId(): Long = username.toLong()
