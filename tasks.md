@@ -131,6 +131,120 @@
 
 ---
 
+## Phase 6 — 신규 메뉴 API (장바구니 / 예산 / 마이페이지)
+
+### 장바구니 (`/api/cart`)
+
+> 월 단위 주간별 관리 — 해당 월을 1~5주차로 구분하여 장바구니 생성/조회
+
+#### 엔티티
+- [x] `CartWeek.kt` 엔티티 생성 — 주차 단위 장바구니 묶음
+  - [x] 필드: `id`, `memberId`, `year`, `month`, `weekOfMonth` (1~5), `label` (예: "4월 1주차"), `createdAt`
+  - [x] `@Entity`, `@Table(name = "cart_weeks")` 선언
+  - [x] `(memberId, year, month, weekOfMonth)` unique 제약
+- [x] `CartItem.kt` 엔티티 생성
+  - [x] 필드: `id`, `cartWeekId` (FK → CartWeek), `name`, `quantity`, `unitPrice`, `isChecked`, `displayOrder`, `createdAt`, `modifiedAt`
+  - [x] `@ManyToOne` 연관관계 설정 (`CartWeek`)
+
+#### Repository / Service / Controller
+- [x] `CartWeekRepository.kt` + `CartWeekRepositoryCustom` (QueryDSL — fetchJoin으로 items 로딩)
+- [x] `CartItemRepository.kt`
+- [x] `CartService.kt`
+  - [x] `findWeeksByMonth(memberId, year, month)` — 해당 월의 주차 목록 + 아이템 목록 반환
+  - [x] `findOrCreateWeek(memberId, request)` — 주차 없으면 자동 생성
+  - [x] `createItem(weekId, memberId, request)` 구현
+  - [x] `updateItem(id, memberId, request)` 구현
+  - [x] `deleteItem(id, memberId)` 구현
+  - [x] `toggleCheck(id, memberId)` 구현
+  - [x] `weekTotal` — totalAmount / checkedAmount를 CartWeekResponse에 포함
+- [x] `CartController.kt`
+  - [x] `GET /api/cart?year={YYYY}&month={M}` — 해당 월 주차별 장바구니 목록 반환
+  - [x] `POST /api/cart/weeks` — 주차 수동 생성 (body: year, month, weekOfMonth)
+  - [x] `POST /api/cart/weeks/{weekId}/items` — 아이템 추가
+  - [x] `PUT /api/cart/items/{id}` — 아이템 수정 (이름/수량/단가)
+  - [x] `DELETE /api/cart/items/{id}` — 아이템 삭제
+  - [x] `PATCH /api/cart/items/{id}/check` — 체크 토글
+  - [x] `DELETE /api/cart/weeks/{weekId}/checked` — 주차 내 체크 항목 일괄 삭제
+
+#### DTO
+- [x] `CartWeekResponse.kt` (id, label, items, totalAmount, checkedAmount)
+- [x] `CartItemRequest.kt` (name, quantity, unitPrice)
+- [x] `CartItemResponse.kt` (id, name, quantity, unitPrice, lineTotal, isChecked)
+
+---
+
+### 예산 (`/api/budget`)
+
+#### 엔티티
+- [ ] `Budget.kt` 엔티티 생성
+  - [ ] 필드: `id`, `userId`, `category`, `amount`, `month` (YearMonth), `createdAt`, `updatedAt`
+- [ ] `Expense.kt` 엔티티 생성
+  - [ ] 필드: `id`, `budgetId`, `description`, `amount`, `spentAt`, `createdAt`
+
+#### Repository / Service / Controller
+- [ ] `BudgetRepository.kt`
+- [ ] `ExpenseRepository.kt`
+- [ ] `BudgetService.kt`
+  - [ ] `findByMonth(userId, month)` — 월별 예산 목록 + 지출 합산
+  - [ ] `create(request)` 구현
+  - [ ] `update(id, request)` 구현
+  - [ ] `delete(id)` 구현
+- [ ] `ExpenseService.kt`
+  - [ ] `findByBudgetId(budgetId)` 구현
+  - [ ] `create(budgetId, request)` 구현
+  - [ ] `delete(id)` 구현
+- [ ] `BudgetController.kt`
+  - [ ] `GET /api/budget?month={YYYY-MM}` — 월별 예산 목록 (지출 합산 포함)
+  - [ ] `POST /api/budget` — 예산 항목 생성
+  - [ ] `PUT /api/budget/{id}` — 예산 수정
+  - [ ] `DELETE /api/budget/{id}` — 예산 삭제
+- [ ] `ExpenseController.kt`
+  - [ ] `GET /api/budget/{budgetId}/expenses` — 지출 목록
+  - [ ] `POST /api/budget/{budgetId}/expenses` — 지출 추가
+  - [ ] `DELETE /api/budget/expenses/{id}` — 지출 삭제
+
+#### DTO
+- [ ] `BudgetRequest.kt` (category, amount, month)
+- [ ] `BudgetResponse.kt` (spent, remaining 포함)
+- [ ] `ExpenseRequest.kt` (description, amount, spentAt)
+- [ ] `ExpenseResponse.kt`
+
+---
+
+### 마이페이지 (`/api/users`)
+
+#### API
+- [ ] `UserController.kt` 확장
+  - [ ] `GET /api/users/me` — 내 정보 조회 (이름, 이메일)
+  - [ ] `PUT /api/users/me` — 내 정보 수정 (이름)
+  - [ ] `PUT /api/users/me/password` — 비밀번호 변경
+
+#### DTO
+- [ ] `UpdateUserRequest.kt` (name)
+- [ ] `ChangePasswordRequest.kt` (currentPassword, newPassword)
+- [ ] `UserResponse.kt` (id, name, email)
+
+---
+
+### 홈 요약 (`/api/home`)
+- [ ] `HomeController.kt` 생성
+  - [ ] `GET /api/home/summary` — 통합 요약 응답
+    - [ ] 오늘 리마인더 수 (dueDate = 오늘, 미완료)
+    - [ ] 장바구니 미체크 아이템 수
+    - [ ] 이번 달 총 예산 / 총 지출 / 잔액
+    - [ ] 최근 리마인더 5개 (생성일 기준)
+- [ ] `HomeSummaryResponse.kt` DTO
+
+---
+
+### Phase 6 완료 기준
+- [ ] 장바구니 CRUD + 체크 토글 API 동작 확인
+- [ ] 예산 월별 조회 — 지출 합산 정확성 확인
+- [ ] 홈 요약 API 데이터 정확성 확인
+- [ ] 마이페이지 정보 수정 API 동작 확인
+
+---
+
 ## 전체 진행 현황
 
 | Phase | 설명 | 진행 |
@@ -140,3 +254,4 @@
 | Phase 3 | 상세 패널 + 스마트 목록 | 🔲 |
 | Phase 4 | 고급 기능 | 🔲 |
 | Phase 5 | 다크모드 + 마무리 | 🔲 |
+| Phase 6 | 신규 메뉴 API | 🔲 |
