@@ -59,20 +59,20 @@ class ReminderListTest {
         }
 
         @Test
-        fun `생성 시 updatedAt이 현재 시각으로 설정된다`() {
+        fun `생성 시 modifiedAt이 현재 시각으로 설정된다`() {
             val before = LocalDateTime.now()
             val list = ReminderList(memberId = memberId, name = "테스트")
             val after = LocalDateTime.now()
 
-            assertThat(list.updatedAt).isAfterOrEqualTo(before)
-            assertThat(list.updatedAt).isBeforeOrEqualTo(after)
+            assertThat(list.modifiedAt).isAfterOrEqualTo(before)
+            assertThat(list.modifiedAt).isBeforeOrEqualTo(after)
         }
 
         @Test
-        fun `생성 직후 createdAt과 updatedAt은 같다`() {
+        fun `생성 직후 createdAt과 modifiedAt은 같다`() {
             val list = ReminderList(memberId = memberId, name = "테스트")
 
-            assertThat(list.createdAt).isEqualTo(list.updatedAt)
+            assertThat(list.createdAt).isEqualTo(list.modifiedAt)
         }
     }
 
@@ -110,14 +110,14 @@ class ReminderListTest {
         }
 
         @Test
-        fun `update 호출 시 updatedAt이 갱신된다`() {
+        fun `update 호출 시 modifiedAt이 갱신된다`() {
             val list = ReminderList(memberId = memberId, name = "목록")
-            val beforeUpdate = list.updatedAt
+            val beforeUpdate = list.modifiedAt
 
             Thread.sleep(10)
             list.update(UpdateReminderListRequest(name = "변경", color = list.color, displayOrder = list.displayOrder))
 
-            assertThat(list.updatedAt).isAfter(beforeUpdate)
+            assertThat(list.modifiedAt).isAfter(beforeUpdate)
         }
 
         @Test

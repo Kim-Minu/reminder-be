@@ -32,6 +32,6 @@ class ReminderList(
         this.name = request.name
         this.color = request.color
         this.displayOrder = request.displayOrder
-        this.updatedAt = LocalDateTime.now()
+        this.modifiedAt = LocalDateTime.now()
     }
 }

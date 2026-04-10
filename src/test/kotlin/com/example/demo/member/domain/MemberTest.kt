@@ -23,10 +23,10 @@ class MemberTest {
     inner class DateAutoRegistration {
 
         @Test
-        fun `생성 시 createdAt과 updatedAt이 동일하다`() {
+        fun `생성 시 createdAt과 modifiedAt이 동일하다`() {
             val member = Member(email = "test@example.com", password = "hashed", name = "홍길동")
 
-            assertThat(member.createdAt).isEqualTo(member.updatedAt)
+            assertThat(member.createdAt).isEqualTo(member.modifiedAt)
         }
     }
 }

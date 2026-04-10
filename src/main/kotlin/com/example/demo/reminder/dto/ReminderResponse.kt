@@ -20,7 +20,7 @@ data class ReminderResponse(
     val completedAt: LocalDateTime?,
     val displayOrder: Int,
     val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime,
+    val modifiedAt: LocalDateTime,
 ) {
     companion object {
         fun from(domain: Reminder) = ReminderResponse(
@@ -36,7 +36,7 @@ data class ReminderResponse(
             completedAt = domain.completedAt,
             displayOrder = domain.displayOrder,
             createdAt = domain.createdAt,
-            updatedAt = domain.updatedAt,
+            modifiedAt = domain.modifiedAt,
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.example.demo.member.domain
 
+import com.example.demo.common.domain.BaseTimeEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -18,13 +19,7 @@ class RefreshToken(
 
     @Column(nullable = false)
     val expiresAt: LocalDateTime,
-) {
-    @Column(nullable = false, updatable = false)
-    val createdAt: LocalDateTime
-
-    init {
-        createdAt = LocalDateTime.now()
-    }
+) : BaseTimeEntity() {
 
     fun isExpired(): Boolean = LocalDateTime.now().isAfter(expiresAt)
 }

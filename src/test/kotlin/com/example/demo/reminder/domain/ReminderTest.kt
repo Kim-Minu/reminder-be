@@ -32,10 +32,10 @@ class ReminderTest {
     inner class DateAutoRegistration {
 
         @Test
-        fun `생성 시 createdAt과 updatedAt이 동일하다`() {
+        fun `생성 시 createdAt과 modifiedAt이 동일하다`() {
             val reminder = Reminder(reminderList = makeList(), title = "할 일")
 
-            assertThat(reminder.createdAt).isEqualTo(reminder.updatedAt)
+            assertThat(reminder.createdAt).isEqualTo(reminder.modifiedAt)
         }
     }
 
@@ -61,14 +61,14 @@ class ReminderTest {
         }
 
         @Test
-        fun `update 호출 시 updatedAt이 갱신된다`() {
+        fun `update 호출 시 modifiedAt이 갱신된다`() {
             val reminder = Reminder(reminderList = makeList(), title = "할 일")
-            val before = reminder.updatedAt
+            val before = reminder.modifiedAt
 
             Thread.sleep(5)
             reminder.update("변경", null, false, Priority.NONE, null, null, 0)
 
-            assertThat(reminder.updatedAt).isAfterOrEqualTo(before)
+            assertThat(reminder.modifiedAt).isAfterOrEqualTo(before)
         }
     }
 }

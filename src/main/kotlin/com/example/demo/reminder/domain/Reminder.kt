@@ -62,12 +62,12 @@ class Reminder(
         this.dueDate = dueDate
         this.dueTime = dueTime
         this.displayOrder = displayOrder
-        this.updatedAt = LocalDateTime.now()
+        this.modifiedAt = LocalDateTime.now()
     }
 
     fun toggleComplete() {
         this.isCompleted = !this.isCompleted
         this.completedAt = if (this.isCompleted) LocalDateTime.now() else null
-        this.updatedAt = LocalDateTime.now()
+        this.modifiedAt = LocalDateTime.now()
     }
 }
