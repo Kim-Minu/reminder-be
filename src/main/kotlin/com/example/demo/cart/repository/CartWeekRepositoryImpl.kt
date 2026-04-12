@@ -26,4 +26,19 @@ class CartWeekRepositoryImpl(
             .orderBy(week.weekOfMonth.asc())
             .distinct()
             .fetch()
+
+    override fun findCheckedTotalsByYear(memberId: Long, year: Int): Map<Int, Int> =
+        queryFactory
+            .select(week.month, item.quantity.multiply(item.unitPrice).sum())
+            .from(week)
+            .leftJoin(week.items, item).on(item.isChecked.isTrue)
+            .where(
+                week.memberId.eq(memberId),
+                week.year.eq(year),
+            )
+            .groupBy(week.month)
+            .fetch()
+            .associate { tuple ->
+                tuple.get(week.month)!! to (tuple.get(1, Int::class.java) ?: 0)
+            }
 }

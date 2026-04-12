@@ -10,6 +10,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 5
   jpa:
     properties:
       hibernate:
@@ -21,6 +23,14 @@ spring:
   output:
     ansi:
       enabled: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
 
 jwt:
   secret: bXlWZXJ5U2VjcmV0S2V5Rm9ySnd0VG9rZW5HZW5lcmF0aW9uMjAyNlJlbWluZGVyc0FwcA==

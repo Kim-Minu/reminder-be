@@ -45,6 +45,7 @@ dependencies {
     kapt("jakarta.persistence:jakarta.persistence-api")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.mockk:mockk:1.13.17")

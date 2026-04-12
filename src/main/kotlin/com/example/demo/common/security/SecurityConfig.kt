@@ -2,6 +2,7 @@ package com.example.demo.common.security
 
 import com.example.demo.common.security.jwt.JwtAuthenticationFilter
 import com.example.demo.common.security.jwt.JwtTokenProvider
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -32,7 +33,13 @@ class SecurityConfig(
             .authorizeHttpRequests {
                 it.requestMatchers("/api/auth/**").permitAll()
                 it.requestMatchers("/h2-console/**").permitAll()
+                it.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 it.anyRequest().authenticated()
+            }
+            .exceptionHandling {
+                it.authenticationEntryPoint { _, response, _ ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+                }
             }
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
             .headers { it.frameOptions { fo -> fo.sameOrigin() } }
@@ -43,7 +50,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.setAllowedOrigins(mutableListOf<String?>("http://localhost:3000") as List<String>?)
+        config.setAllowedOrigins(mutableListOf<String?>("http://localhost:3000", "http://0.0.0.0:3000", "http://192.168.0.21:3000") as List<String>?)
         config.setAllowedMethods(mutableListOf<String?>("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") as List<String>?)
         config.setAllowedHeaders(mutableListOf<String?>("*") as List<String>?)
         config.setAllowCredentials(true) // 쿠키/인증 사용 시

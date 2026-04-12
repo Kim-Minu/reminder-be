@@ -176,38 +176,37 @@
 ### 예산 (`/api/budget`)
 
 #### 엔티티
-- [ ] `Budget.kt` 엔티티 생성
-  - [ ] 필드: `id`, `userId`, `category`, `amount`, `month` (YearMonth), `createdAt`, `updatedAt`
-- [ ] `Expense.kt` 엔티티 생성
-  - [ ] 필드: `id`, `budgetId`, `description`, `amount`, `spentAt`, `createdAt`
+- [x] `Budget.kt` 엔티티 생성
+  - [x] 필드: `id`, `memberId`, `category`, `amount`, `month` (YearMonth), `createdAt`, `modifiedAt`
+- [x] `Expense.kt` 엔티티 생성
+  - [x] 필드: `id`, `budgetId`, `description`, `amount`, `spentAt`, `createdAt`
 
 #### Repository / Service / Controller
-- [ ] `BudgetRepository.kt`
-- [ ] `ExpenseRepository.kt`
-- [ ] `BudgetService.kt`
-  - [ ] `findByMonth(userId, month)` — 월별 예산 목록 + 지출 합산
-  - [ ] `create(request)` 구현
-  - [ ] `update(id, request)` 구현
-  - [ ] `delete(id)` 구현
-- [ ] `ExpenseService.kt`
-  - [ ] `findByBudgetId(budgetId)` 구현
-  - [ ] `create(budgetId, request)` 구현
-  - [ ] `delete(id)` 구현
-- [ ] `BudgetController.kt`
-  - [ ] `GET /api/budget?month={YYYY-MM}` — 월별 예산 목록 (지출 합산 포함)
-  - [ ] `POST /api/budget` — 예산 항목 생성
-  - [ ] `PUT /api/budget/{id}` — 예산 수정
-  - [ ] `DELETE /api/budget/{id}` — 예산 삭제
-- [ ] `ExpenseController.kt`
-  - [ ] `GET /api/budget/{budgetId}/expenses` — 지출 목록
-  - [ ] `POST /api/budget/{budgetId}/expenses` — 지출 추가
-  - [ ] `DELETE /api/budget/expenses/{id}` — 지출 삭제
+- [x] `BudgetRepository.kt`
+- [x] `ExpenseRepository.kt`
+- [x] `BudgetService.kt`
+  - [x] `findByMonth(memberId, month)` — 월별 예산 목록 + 지출 합산
+  - [x] `create(request)` 구현
+  - [x] `update(id, request)` 구현
+  - [x] `delete(id)` 구현
+- [x] `ExpenseService.kt`
+  - [x] `findByBudgetId(budgetId)` 구현
+  - [x] `create(budgetId, request)` 구현
+  - [x] `delete(id)` 구현
+- [x] `BudgetController.kt`
+  - [x] `GET /api/budget?month={YYYY-MM}` — 월별 예산 목록 (지출 합산 포함)
+  - [x] `POST /api/budget` — 예산 항목 생성
+  - [x] `PUT /api/budget/{id}` — 예산 수정
+  - [x] `DELETE /api/budget/{id}` — 예산 삭제
+  - [x] `GET /api/budget/{budgetId}/expenses` — 지출 목록
+  - [x] `POST /api/budget/{budgetId}/expenses` — 지출 추가
+  - [x] `DELETE /api/budget/expenses/{id}` — 지출 삭제
 
 #### DTO
-- [ ] `BudgetRequest.kt` (category, amount, month)
-- [ ] `BudgetResponse.kt` (spent, remaining 포함)
-- [ ] `ExpenseRequest.kt` (description, amount, spentAt)
-- [ ] `ExpenseResponse.kt`
+- [x] `BudgetRequest.kt` (category, amount, month)
+- [x] `BudgetResponse.kt` (spent, remaining 포함)
+- [x] `ExpenseRequest.kt` (description, amount, spentAt)
+- [x] `ExpenseResponse.kt`
 
 ---
 
